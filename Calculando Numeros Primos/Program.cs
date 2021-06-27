@@ -121,8 +121,9 @@ namespace Calculando_Numeros_Primos
 
         static void ImprimePrimos(List<NumerosPrimos> Imprime, long ini, long max)
         {
+            ini = 2;
             Console.WriteLine($"Exitem {Imprime.Where(w => w.EPrimo).Count()} numeros primos entre {ini} e {max}");
-
+            
             var quantidade = Imprime.Where(w => w.EPrimo).OrderBy(o => o.Numero);
             int indice = 0;
             //monta matriz
