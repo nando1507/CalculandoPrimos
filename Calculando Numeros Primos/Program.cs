@@ -81,8 +81,14 @@ namespace Calculando_Numeros_Primos
 
                 foreach (var item in arrayPrimos.OrderBy(o => o))
                 {
+                    if(num % 2 == 0)
+                    {
+                        divisores += 3;
+                        break;
+                    }
                     if (num % item == 0)
                     {
+                        
                         divisores++;
                     }
                     if(divisores >= 3)
