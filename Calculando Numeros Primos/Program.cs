@@ -87,8 +87,7 @@ namespace Calculando_Numeros_Primos
                         break;
                     }
                     if (num % item == 0)
-                    {
-                        
+                    {                        
                         divisores++;
                     }
                     if(divisores >= 3)
@@ -128,7 +127,11 @@ namespace Calculando_Numeros_Primos
             int indice = 0;
             //monta matriz
             Dictionary<int, string> matriz = new Dictionary<int, string>();
-            string[] aux = new string[10]; ;
+            var qtde = quantidade.Count();
+
+            int raiz = (int)Math.Sqrt(qtde) + 1;
+
+            string[] aux = new string[raiz]; ;
 
             int i = 0;
             foreach (var item in quantidade)
@@ -140,16 +143,19 @@ namespace Calculando_Numeros_Primos
                 {
                     string insert = string.Empty;
 
+                    string ta = max.ToString();
                     for (int X = 0; X < aux.Length; X++)
-                    {
-                        insert = (X != 0 ? insert + " | " : "") + aux[X].Trim().PadLeft(2, '0');
-
+                    {                        
+                        insert = (X != 0 ? insert + " | " : "") + aux[X].Trim().PadLeft(ta.Length, ' ');
                     }
                     matriz.Add(indice, insert);
                     i = 0;
                     indice++;
                 }
             }
+
+           // var m = MontaMatriz(matriz);
+
             StreamWriter sw = new StreamWriter(@"C:\Temp\Primos.txt");
             foreach (var item in matriz.OrderBy(o => o.Key))
             {
@@ -164,6 +170,15 @@ namespace Calculando_Numeros_Primos
             sw.Close();
         }
 
+        public static string[][] MontaMatriz(Dictionary<int, string> matriz)
+        {
+            var qtde = matriz.Count();
+            int raiz = (int)Math.Sqrt(qtde);
+
+            string[][] aux = new string[raiz][];
+
+            return aux;
+        }
 
 
     }
