@@ -48,19 +48,30 @@ namespace Calculando_Numeros_Primos
                     primos.Add(new NumerosPrimos { Numero = 3, QuantidadeDivisores = 2, EPrimo = true, tempoCalculo = DateTime.Now.Subtract(DateTime.Now) });
                     primos.Add(new NumerosPrimos { Numero = 2, QuantidadeDivisores = 2, EPrimo = true, tempoCalculo = DateTime.Now.Subtract(DateTime.Now) });
 
-                    for (long i = ini; i <= fim; i++)
-                    {
+                    //for (long i = ini; i <= fim; i++)
+                    //{
+                    //    NumerosPrimos numeros = new NumerosPrimos();
+                    //    DateTime DtInicio = DateTime.Now;
+                    //    numeros.Numero = i;
+                    //    numeros.QuantidadeDivisores = await Divisores(i, primos);
+                    //    numeros.EPrimo = numeros.QuantidadeDivisores > 2 ? false : true;
+                    //    DateTime DtFim = DateTime.Now;
+                    //    numeros.tempoCalculo = DtFim.Subtract(DtInicio);
+
+                    //    primos.Add(numeros);
+                    //}
+
+                    Parallel.For(ini, fim, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async Index => {
                         NumerosPrimos numeros = new NumerosPrimos();
                         DateTime DtInicio = DateTime.Now;
-                        numeros.Numero = i;
-                        numeros.QuantidadeDivisores = await Divisores(i, primos);
+                        numeros.Numero = Index;
+                        numeros.QuantidadeDivisores = await Divisores(Index, primos);
                         numeros.EPrimo = numeros.QuantidadeDivisores > 2 ? false : true;
                         DateTime DtFim = DateTime.Now;
                         numeros.tempoCalculo = DtFim.Subtract(DtInicio);
 
                         primos.Add(numeros);
-                    }
-
+                    });
 
 
                     return primos;
@@ -69,35 +80,54 @@ namespace Calculando_Numeros_Primos
             return await await tasks;
         }
 
+        
         static async Task<int> Divisores(long num, List<NumerosPrimos> primos)
         {
             int divisores = 0;
             long aux = num;
             if (aux > 3)
             {
-                var arrayPrimos = primos.Where(w => w.EPrimo).Select(s => s.Numero).OrderBy(o => o).ToList();
+                var arrayPrimos = primos.AsParallel().Where(w => w.EPrimo).Select(s => s.Numero).OrderBy(o => o).ToList();
                 arrayPrimos.Add(num);
                 arrayPrimos.Add(1);
 
-                foreach (var item in arrayPrimos.OrderBy(o => o))
+                Parallel.ForEach(arrayPrimos.OrderBy(o => o), new ParallelOptions { MaxDegreeOfParallelism = 4}, ( item, loopState) =>
                 {
-                    if(num % 2 == 0)
+                    if (num % 2 == 0)
                     {
                         divisores += 3;
-                        break;
+                        loopState.Stop();
                     }
                     if (num % item == 0)
-                    {                        
+                    {
                         divisores++;
                     }
-                    if(divisores >= 3)
+                    if (divisores >= 3)
                     {
-                        break;
+                        loopState.Stop();
+                        //break;
                     }
-                }
+                });
+
+                //foreach (var item in arrayPrimos.AsParallel().OrderBy(o => o))
+                //{
+                //    if (num % 2 == 0)
+                //    {
+                //        divisores += 3;
+                //        break;
+                //    }
+                //    if (num % item == 0)
+                //    {
+                //        divisores++;
+                //    }
+                //    if (divisores >= 3)
+                //    {
+                //        break;
+                //    }
+                //}
                 //for (int i = 1; i <= num; i++)
                 //{
-                    
+
                 //}
                 //aux--;
             }
@@ -121,9 +151,9 @@ namespace Calculando_Numeros_Primos
         static void ImprimePrimos(List<NumerosPrimos> Imprime, long ini, long max)
         {
             ini = 2;
-            Console.WriteLine($"Exitem {Imprime.Where(w => w.EPrimo).Count()} numeros primos entre {ini} e {max}");
-            
-            var quantidade = Imprime.Where(w => w.EPrimo).OrderBy(o => o.Numero);
+            Console.WriteLine($"Exitem {Imprime.AsParallel().Where(w => w.EPrimo).Count()} numeros primos entre {ini} e {max}");
+
+            var quantidade = Imprime.AsParallel().Where(w => w.EPrimo).OrderBy(o => o.Numero);
             int indice = 0;
             //monta matriz
             Dictionary<int, string> matriz = new Dictionary<int, string>();
@@ -145,7 +175,7 @@ namespace Calculando_Numeros_Primos
 
                     string ta = max.ToString();
                     for (int X = 0; X < aux.Length; X++)
-                    {                        
+                    {
                         insert = (X != 0 ? insert + " | " : "") + aux[X].Trim().PadLeft(ta.Length, ' ');
                     }
                     matriz.Add(indice, insert);
@@ -154,7 +184,7 @@ namespace Calculando_Numeros_Primos
                 }
             }
 
-           // var m = MontaMatriz(matriz);
+            // var m = MontaMatriz(matriz);
 
             StreamWriter sw = new StreamWriter(@"C:\Temp\Primos.txt");
             foreach (var item in matriz.OrderBy(o => o.Key))
